@@ -252,7 +252,7 @@ class Automaton {
         $lastIndex = count($chars) - 1;
 
         foreach ($chars as $index => $char) {
-            if (in_array($char, array_merge([''], $symbols = array_keys($this->symbols)))) {
+            if (in_array($char, array_merge([' '], $symbols = array_keys($this->symbols)))) {
                 if ($currentState == 'q1') {
                     $this->setVariable($currentString, $index);
                 } else if ($currentState == 'q2') {
