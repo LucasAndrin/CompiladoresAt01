@@ -252,7 +252,7 @@ class Automaton {
         $lastIndex = count($chars) - 1;
 
         foreach ($chars as $index => $char) {
-            if (in_array($char, array_merge([' '], $symbols = array_keys($this->symbols)))) {
+            if (in_array($char, $symbols = array_keys($this->symbols)) || ctype_space($char)) {
                 if ($currentState == 'q1') {
                     $this->setVariable($currentString, $index);
                 } else if ($currentState == 'q2') {
@@ -279,7 +279,7 @@ class Automaton {
             } else {
                 return [
                     'bool' => false,
-                    'message' => "Error in index $index: Invalid Expression! You cannot initialize a variable with a number."
+                    'message' => "Error in index $index: $currentString Is a Invalid Expression! You cannot initialize a variable with a number."
                 ];
             }
 
