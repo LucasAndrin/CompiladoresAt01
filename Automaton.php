@@ -15,150 +15,120 @@ class Automaton {
             'integer' => 'q2'
         ],
         'q1' => [
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q2' => [
-            ' ' => 'q0',
             'integer' => 'q2'
         ],
         'q3' => [
             'f' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q4' => [
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q5' => [
             'o' => 'q6',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q6' => [
             'r' => 'q7',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q7' => [
             'e' => 'q34',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q8' => [
             'h' => 'q9',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q9' => [
             'i' => 'q10',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q10' => [
             'l' => 'q11',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q11' => [
             'e' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q13' => [
             'w' => 'q14',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q14' => [
             'i' => 'q15',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q15' => [
             't' => 'q16',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q16' => [
             'c' => 'q17',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q17' => [
             'h' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q19' => [
             'o' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q21' => [
             'l' => 'q22',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q22' => [
             's' => 'q23',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q23' => [
             'e' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q25' => [
             'r' => 'q26',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q26' => [
             'i' => 'q27',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q27' => [
             'n' => 'q28',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q28' => [
             't' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q30' => [
             'e' => 'q31',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q31' => [
             'a' => 'q32',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q32' => [
             'd' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q34' => [
             'a' => 'q35',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q35' => [
             'c' => 'q36',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
         'q36' => [
             'h' => 'q4',
-            ' ' => 'q0',
             'variable' => 'q1'
         ],
     ];
@@ -180,10 +150,30 @@ class Automaton {
         'read'
     ];
 
+    public array $symbols = [
+        '+' => 'PLUS',
+        '-' => 'MINUS',
+        '>' => 'BIGGER_THAN',
+        '<' => 'LESS_THAN',
+        '=' => 'EQUAL',
+        '*' => 'MULTIPLY',
+        '/' => 'DIVIDED',
+        '%' => 'REST',
+        '(' => 'OPEN_PARENTHESES',
+        ')' => 'CLOSE_PARENTHESES',
+        '[' => 'OPEN_BRACKETS',
+        ']' => 'CLOSE_BRACKETS',
+        '{' => 'OPEN_BRACE',
+        '}' => 'CLOSE_BRACE',
+    ];
+
     public function __construct(string $string)
     {
         $this->setChars($string);
         foreach ($this->reservedWords as $reservedWord) {
+            $this->{$reservedWord} = [];
+        }
+        foreach ($this->symbols as $reservedWord) {
             $this->{$reservedWord} = [];
         }
     }
@@ -238,6 +228,16 @@ class Automaton {
         ];
     }
 
+    private function setSymbol(string $symbol, int $pos): void
+    {
+        $this->{$this->symbols[$symbol]}[] = [
+            'token' => $this->symbols[$symbol],
+            'lexeme' => $symbol,
+            'initial' => $pos - 1,
+            'final' => $pos,
+        ];
+    }
+
     public function getTransitions(): array
     {
         return $this->transitions;
@@ -252,19 +252,23 @@ class Automaton {
         $lastIndex = count($chars) - 1;
 
         foreach ($chars as $index => $char) {
-            if (array_key_exists($char, $transitions[$currentState])) {
-                if ($char == ' ') {
-                    if ($currentState == 'q1') {
-                        $this->setVariable($currentString, $index);
-                    } else if ($currentState == 'q2') {
-                        $this->setConstant($currentString, $index);
-                    } else if ($currentState == 'q4') {
-                        $this->setRelativeLexeme($currentString, $index);
-                    }
-                    $currentString = '';
-                } else {
-                    $currentString .= $char;
+            if (in_array($char, array_merge([''], $symbols = array_keys($this->symbols)))) {
+                if ($currentState == 'q1') {
+                    $this->setVariable($currentString, $index);
+                } else if ($currentState == 'q2') {
+                    $this->setConstant($currentString, $index);
+                } else if (in_array($currentState, ['q4', 'q7'])) {
+                    $this->setRelativeLexeme($currentString, $index);
                 }
+
+                if (in_array($char, $symbols)) {
+                    $this->setSymbol($char, $index);
+                }
+
+                $currentString = '';
+                $currentState = 'q0';
+            } else if (array_key_exists($char, $transitions[$currentState])) {
+                $currentString .= $char;
                 $currentState = $transitions[$currentState][$char];
             } else if (is_numeric($char) && array_key_exists('integer', $transitions[$currentState])) {
                 $currentString .= $char;

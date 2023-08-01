@@ -62,6 +62,12 @@ $string = trim($string);
                         <pre><?php print_r($automaton->{$reservedWord}) ?></pre>
                         <br>
                     <?php } ?>
+
+                    <?php foreach ($automaton->symbols as $symbol) { ?>
+                        <h4><code class="text-indigo bg-dark rounded p-1"><?php echo $symbol ?></code></h4>
+                        <pre><?php print_r($automaton->{$symbol}) ?></pre>
+                        <br>
+                    <?php } ?>
                 </code>
             <?php
                 }
