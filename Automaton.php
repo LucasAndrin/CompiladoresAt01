@@ -283,12 +283,13 @@ class Automaton {
                 ];
             }
 
-            if ($index == $lastIndex) {
+            if ($index == $lastIndex && $currentString) {
                 if (in_array($currentString, $this->reservedWords)) {
                     $this->setRelativeLexeme($currentString, $index + 1);
                 } else if (is_numeric($currentString)) {
                     $this->setConstant($currentString, $index + 1);
                 } else {
+                    var_dump($index, $currentString);
                     $this->setVariable($currentString, $index + 1);
                 }
             }
